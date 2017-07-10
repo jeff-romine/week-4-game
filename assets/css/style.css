@@ -1,0 +1,73 @@
+@font-face { font-family: StarJedi; src: url('../fonts/starjedi/Starjedi.ttf'); }
+@font-face { font-family: StarJHol; src: url('../fonts/starjedi/Starjhol.ttf'); }
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    /* font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; */
+    /*font-family: StarJedi;*/
+    font-family: StarJHol;
+    color: #000;
+    background: url("../images/lightside.jpeg");
+}
+
+#top-panel {
+    background-color: rgba(0,0,0,0);
+    text-align: center;
+    color: black;
+}
+@keyframes slidein {
+    from {
+        margin-left: 100%;
+        width: 100%;
+    }
+
+    to {
+        margin-left: 0%;
+        width: 100%;
+    }
+}
+#message-area {
+    font-family: StarJedi;
+    color: black;
+    overflow: hidden;
+    padding: 40px 0;
+    border-width: 0;
+}
+
+
+#message-area h2 {
+    animation-duration: 10s;
+    animation-name: slidein;
+    animation-iteration-count: infinite;
+}
+
+
+#top-panel h1 {
+    font-size: 64px;
+}
+
+#select-player {
+    height: 200px;
+    margin: 20px 0 40px 0;
+}
+
+#select-opponent {
+    height: 100px
+}
+
+#battle-area,#opponent-area,#current-opponent-area {
+    height: 300px;
+}
+
+#selected-player {
+    height: 100%;
+}
+
+#selected-opponents {
+    height: 40%;
+    margin-top: 100px;
+}
+

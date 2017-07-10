@@ -29,18 +29,34 @@
 
 <body>
 <div id="main-container" class="container">
-    <div class="row">
-      <div id="select-player" class="col-sm-12">
-
-      </div>
-    </div>
-    <div class="row select-enemy select">
-        selected-player
-    </div>
-    <div class="row defender select">
-        selected enemy
+  <div class="row">
+    <div id="top-panel" class="col-sm-12 col-md-12 col-lg-12">
+      <h1>the force awakens</h1>
     </div>
   </div>
+
+  <div id="message-area" class="row">
+    <h2 id="instruction-message"></h2>
+  </div>
+
+  <div class="row">
+    <div id="select-player" class="col-sm-12 col-md-12 col-lg-12">
+    </div>
+  </div>
+
+  <div id="battle-area" class="row">
+    <div class="col-sm-1"></div>
+    <div id="selected-player" class="col-sm-4"></div>
+    <div class="col-sm-1"></div>
+
+    <div id="select-opponent" class="col-sm-6"></div>
+
+    <div                            class="opponent-area col-sm-1"></div>
+    <div id="current-opponent-area" class="opponent-area col-sm-4"></div>
+    <div                            class="opponent-area col-sm-1"></div>
+
+  </div>
+
 </div>
 
 <script src="assets/javascript/game.js"></script>
