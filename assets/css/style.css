@@ -44,7 +44,6 @@ body {
     animation-iteration-count: infinite;
 }
 
-
 #top-panel h1 {
     font-size: 64px;
 }
@@ -55,7 +54,8 @@ body {
 }
 
 #select-opponent {
-    height: 100px
+    height: 100px;
+    margin-top: 100px;
 }
 
 #battle-area,#opponent-area,#current-opponent-area {
