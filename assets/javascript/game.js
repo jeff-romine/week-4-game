@@ -10,6 +10,7 @@ $(document).ready(function () {
     this.side = side;
     this.id = toKebobCase(name);
     this.healthPoints = healthPoints;
+    this.startingHealthPoints = healthPoints;
     this.attackPower = attackPower;
     this.baseAttackPower = attackPower;
     this.counterAttackPower = counterAttackPower;
@@ -34,6 +35,35 @@ $(document).ready(function () {
           })
         .css("height", "100%");
 
+      if (p.healthPoints <= 0) {
+        var deadImg = $("<img>")
+          .attr("src","assets/images/dead.png")
+          .addClass("dead-indicator");
+        $(div).append(deadImg);
+      }
+      if ((p === selectedPlayer) || (p === selectedOpponent) && isAlive(p)) {
+        $(div).addClass("progress");
+
+        var progressBarWidth =
+          Math.min(Math.ceil((p.healthPoints/p.startingHealthPoints) * 100)).toString()
+          + "%";
+
+        var progressBar = $("<div>")
+          .addClass("progress-bar")
+          .attr("role","progressbar")
+          .attr("aria-valuenow",p.healthPoints.toString())
+          .attr("aria-valuemin","0")
+          .attr("aria-valuemax",p.startingHealthPoints.toString())
+          .css({
+            "width":progressBarWidth,
+            "height":"10%",
+            "position":"absolute",
+            "bottom":"0",
+            "left":"0",
+            "padding":"0"}).text(p.healthPoints);
+
+        $(div).append(progressBar);
+      }
       $("#" + id).append(div);
 
     });
@@ -86,47 +116,70 @@ $(document).ready(function () {
     return sSelectOpponent;
   }
 
+  function updateSelectedPlayer() {
+    updateImageArea("selected-player","col-sm-12 col-md-12 col-lg-12", [selectedPlayer]);
+  }
+
+  function updateSelectedOpponent() {
+    updateImageArea("current-opponent-area","col-sm-12 col-md-12 col-lg-12", [selectedOpponent]);
+  }
+
+  function updateSelectOpponent() {
+    updateImageArea("select-opponent", "col-sm-4 col-md-4 col-lg-4", selectOpponent);
+  }
+
   function setUpOpponentSelection(selectedPlayer, selectOpponent, message) {
 
     $(".opponent-area").hide();
 
-    updateImageArea("selected-player", "col-sm-12 col-md-12 col-lg-12", [selectedPlayer]);
-    updateImageArea("select-opponent", "col-sm-4 col-md-4 col-lg-4", selectOpponent);
+    updateSelectedPlayer();
+    updateSelectOpponent();
     $("#select-opponent").show();
 
     $("#instruction-message").text(message);
   }
 
-
   function sSelectOpponent(event) {
     console.log("event:", event);
     console.log("characterMap", characterMap);
 
-    var areaId = event.target.parentElement.id;
+    var areaId = event.currentTarget.parentElement.id;
 
     if (areaId !== "select-opponent") {
       $("#instruction-message").text("really? do you not know how to click things?");
       return sSelectOpponent;
     }
 
-    var playerId = event.target.id.substring(areaId.length + 1);
+    var playerId = event.currentTarget.id.substring(areaId.length + 1);
 
     // extract the selected player from the selectOpponent array
 
     var newSelectOpponent = [];
 
+    var deadOpponent = false;
+
     selectOpponent.forEach(function (opponent) {
       if (playerId === opponent.id) {
-        selectedOpponent = opponent;
+        if (isAlive(opponent)) {
+          selectedOpponent = opponent;
+        }
+        else {
+          $("#instruction-message").text("try picking a live one!");
+          deadOpponent = true;
+        }
       }
       else {
         newSelectOpponent.push(opponent);
       }
     });
 
-    selectOpponent = newSelectOpponent;
-    $("#select-opponent").hide();
+    if (deadOpponent) {
+      return sSelectOpponent;
+    }
 
+    selectOpponent = newSelectOpponent;
+
+    $("#select-opponent").hide();
     updateImageArea("current-opponent-area", "col-sm-12 col-md-12 col-lg-12", [selectedOpponent]);
 
     $(".opponent-area").show();
@@ -153,7 +206,7 @@ $(document).ready(function () {
       "new selectedPlayer.attackPower === " + selectedPlayer.attackPower);
 
     if (selectedOpponent.healthPoints <= 0) {
-      return playerWins();
+      return tPlayerWins();
     }
 
     selectedPlayer.healthPoints -= selectedOpponent.counterAttackPower;
@@ -165,23 +218,51 @@ $(document).ready(function () {
     if (selectedPlayer.healthPoints <= 0) {
       return opponentWins();
     }
+    updateSelectedPlayer();
+    updateSelectedOpponent();
     return sFight;
   }
 
-  function playerWins() {
+  var clickToRestart = false;
+
+  function sGameOverPlayerWins() {
+    $("#instruction-message").text("you win! click anywhere to play again.");
+    clickToRestart = true;
+    return sNoop;
+  }
+  function isAlive(p) {
+    return p.healthPoints > 0;
+  }
+
+  function areSomeAlive(players) {
+    return players.some(isAlive);
+  }
+
+  function tPlayerWins() {
 
     selectOpponent.push(selectedOpponent);
-    setUpOpponentSelection(selectedPlayer, selectOpponent, "choose your next opponent");
-    return sSelectOpponent;
+
+    if (areSomeAlive(selectOpponent)) {
+      setUpOpponentSelection(selectedPlayer, selectOpponent, "choose your next opponent");
+      return sSelectOpponent;
+    }
+    else {
+      setUpOpponentSelection(selectedPlayer, selectOpponent, "you win! click anywhere to play again");
+      return sGameOverPlayerWins();
+    }
+  }
+
+  function tGameOverOpponentWins() {
+
+    updateSelectedPlayer();
+
+    $("#instruction-message").text("You have disgraced the " + selectedPlayer.side + " side! click anywhere to try again");
+    clickToRestart = true;
+    return sNoop;
   }
 
   function opponentWins() {
-
-    $("body").click(init);
-
-    $("#instruction-message").text("you have disgraced the " + selectedPlayer.side + " side. click anywhere to try for redemption.");
-
-    return sNoop;
+    return tGameOverOpponentWins();
   }
 
   function init() {
@@ -215,13 +296,30 @@ $(document).ready(function () {
     state = sSelectCharacter;
   }
 
+  function restartHandler(event) {
+    if (clickToRestart) {
+      // This is a trick to ignore the first invocation
+      clickToRestart = false;
+    }
+    else {
+      $("body").unbind("click",restartHandler);
+      init();
+    }
+  }
 
   function clickHandler(event) {
-
-    $("#instruction-message").text("nice hit!");
-
     state = state(event);
-    applyClickHandler();
+    if (clickToRestart) {
+      clearClickHandler();
+      $("body").click(restartHandler);
+    }
+    else {
+      applyClickHandler();
+    }
+  }
+
+  function clearClickHandler() {
+    $(".character-btn").unbind("click", clickHandler);
   }
 
   // It seems to be necessary to re-apply click handlers every time
@@ -229,7 +327,7 @@ $(document).ready(function () {
   function applyClickHandler() {
     // Unbind existing click handlers so that we don't end up
     // with multiple handlers/button.
-    $(".character-btn").unbind("click", clickHandler);
+    clearClickHandler();
 
     $(".character-btn").click(clickHandler);
   }
