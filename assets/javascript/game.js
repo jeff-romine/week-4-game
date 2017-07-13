@@ -256,7 +256,7 @@ $(document).ready(function () {
   }
 
   function tGameOverOpponentWins() {
-    $("#instruction-message").text("You have disgraced the " + selectedPlayer.side + " side! click anywhere to try again");
+    $("#instruction-message").text("You have disgraced the " + selectedPlayer.side + " side! click anywhere to retry");
     clickToRestart = true;
     return sNoop;
   }
