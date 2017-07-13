@@ -1,8 +1,9 @@
-function toKebobCase(name) {
-  return name.toLowerCase().split(" ").join("-");
-}
 
 $(document).ready(function () {
+
+  function toKebobCase(name) {
+    return name.toLowerCase().split(" ").join("-");
+  }
 
   function player(name, side, src, healthPoints, attackPower, counterAttackPower) {
     this.name = name;
@@ -15,6 +16,22 @@ $(document).ready(function () {
     this.baseAttackPower = attackPower;
     this.counterAttackPower = counterAttackPower;
   }
+
+  var selectPlayer;
+  var selectedPlayer;
+  var selectOpponent;
+  var selectedOpponent;
+  var characterMap;
+  var clickToRestart = false;
+
+  var allPlayers = [
+    new player("Finn", "light", "assets/images/finn.jpeg", 133, 15, 25),
+    new player("Rey", "light", "assets/images/rey.jpeg", 150, 17, 35),
+    new player("Luke", "light", "assets/images/luke.jpeg", 145, 14, 20),
+    new player("Kylo Ren", "dark", "assets/images/ren.jpeg", 150, 17, 35),
+    new player("Darth Maul", "dark", "assets/images/darthmaul.jpeg", 145, 14, 20),
+    new player("Captain Phasma", "dark", "assets/images/phasma.jpeg", 133, 15, 25)
+  ];
 
   function updateImageArea(id, classes, players) {
     $("#" + id).empty();
@@ -41,7 +58,7 @@ $(document).ready(function () {
           .addClass("dead-indicator");
         $(div).append(deadImg);
       }
-      if ((p === selectedPlayer) || (p === selectedOpponent) && isAlive(p)) {
+      if (((p === selectedPlayer) || (p === selectedOpponent)) && isAlive(p)) {
         $(div).addClass("progress");
 
         var progressBarWidth =
@@ -69,20 +86,6 @@ $(document).ready(function () {
     });
   }
 
-  var selectPlayer;
-  var selectedPlayer;
-  var selectOpponent;
-  var selectedOpponent;
-  var characterMap;
-
-  var allPlayers = [
-    new player("Finn", "light", "assets/images/finn.jpeg", 100, 5, 10),
-    new player("Rey", "light", "assets/images/rey.jpeg", 100, 5, 10),
-    new player("Luke", "light", "assets/images/luke.jpeg", 100, 5, 10),
-    new player("Kylo Ren", "dark", "assets/images/ren.jpeg", 100, 5, 50),
-    new player("Darth Maul", "dark", "assets/images/darthmaul.jpeg", 100, 5, 10),
-    new player("Captain Phasma", "dark", "assets/images/phasma.jpeg", 100, 5, 10)
-  ];
 
   function sNoop(event) {
     return sNoop;
@@ -205,6 +208,8 @@ $(document).ready(function () {
     console.log(
       "new selectedPlayer.attackPower === " + selectedPlayer.attackPower);
 
+    updateSelectedOpponent();
+
     if (selectedOpponent.healthPoints <= 0) {
       return tPlayerWins();
     }
@@ -215,15 +220,13 @@ $(document).ready(function () {
       "selectedPlayer.healthPoints - " + selectedOpponent.counterAttackPower +
       " === " + selectedPlayer.healthPoints);
 
-    if (selectedPlayer.healthPoints <= 0) {
-      return opponentWins();
-    }
     updateSelectedPlayer();
-    updateSelectedOpponent();
+
+    if (selectedPlayer.healthPoints <= 0) {
+      return tGameOverOpponentWins();
+    }
     return sFight;
   }
-
-  var clickToRestart = false;
 
   function sGameOverPlayerWins() {
     $("#instruction-message").text("you win! click anywhere to play again.");
@@ -253,16 +256,9 @@ $(document).ready(function () {
   }
 
   function tGameOverOpponentWins() {
-
-    updateSelectedPlayer();
-
     $("#instruction-message").text("You have disgraced the " + selectedPlayer.side + " side! click anywhere to try again");
     clickToRestart = true;
     return sNoop;
-  }
-
-  function opponentWins() {
-    return tGameOverOpponentWins();
   }
 
   function init() {
